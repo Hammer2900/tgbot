@@ -51,7 +51,7 @@ class message(object):
             self.json = update['message'] 
         except KeyError, e:
             print e
-            return False            
+            return None          
             
         self.date = self.json['date']
         self.text = self.json['text']
@@ -91,7 +91,7 @@ class bot(object):
             
         except IndexError, e:
             print str(e)
-            return False
+            return None
             
         
     def __init__(self, path_to_key):
@@ -112,6 +112,13 @@ class bot(object):
         except KeyError, e:
             print 'A KeyError ocurred'
             print str(e)
+            
+        except IndexError, e:
+            self.lastUpdateID = 0
+            self.updatesBuff = []
+            
+            print e
+            return None
                 
             
             
