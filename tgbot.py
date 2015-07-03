@@ -10,9 +10,60 @@ import requests
 getMe = u'getMe'
 getUpdates = u'getUpdates'
 
-class tgbot(object):
+class chat(object):
     
-    def sendMessage(self, chat_id, text): 
+    def getID(self):
+        return self.id
+    
+    def __init___(self):
+        self.id = 0
+        
+        
+class user(chat):
+
+    def json(self):
+        
+        userjson = {'id': self.id,
+                    'first_name': self.first_name,
+                    'last_name': self.last_name,
+                    'username': self.username
+                    }  
+        
+        return userjson
+    
+    def __init__(self, userJson):
+        chat.__init__(self)
+        self.json = userJson
+        self.id = self.json['id']
+        try:         
+            self.first_name = self.json['first_name']
+            self.last_name = self.json['last_name']
+            self.username = self.json['username']
+        except KeyError, e:
+            print e    
+
+class message(object):
+    
+    def __init__(self, update):
+        
+        try:
+            
+            self.json = update['message'] 
+        except KeyError, e:
+            print e
+            return False            
+            
+        self.date = self.json['date']
+        self.text = self.json['text']
+        self.userFrom = user(self.json['from'])
+        self.message_id = self.json['message_id']
+        self.chat = (self.json['chat'])
+        
+            
+            
+class bot(object):
+    
+    def sendMessage(self, chat_id, text, ): 
         print chat_id
         return requests.get(self.url + u'sendMessage?chat_id=' + unicode(chat_id) + u'&text=' + text)
     
