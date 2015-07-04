@@ -12,7 +12,7 @@ echoBot = tgbot.bot('ismansiete.txt')
 while True: 
     updateBot = echoBot.getUpdate()    
     if updateBot:
-        message = tgbot.message(Update=updateBot)
+        message = tgbot.Message(Update=updateBot)
         userFrom = message.userFrom
         echoBot.sendMessage(userFrom.id, message.text)       
         
