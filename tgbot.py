@@ -10,24 +10,21 @@ import requests
 getMe = u'getMe'
 getUpdates = u'getUpdates'
 
-class chat(object):
+class Chat(object):
     
-    def getID(self):
-        return self.id
-    
-    def __init___(self):
-        self.id = 0
-        
-        
-class user(chat):
-
     def json(self):
         return self.__dict__  
     
+    def __init__(self):
+        self.id = 0
+        
+        
+class User(Chat):
+
     def __init__(self, **kwargs):
-        chat.__init__(self)
+        Chat.__init__(self)
         try:
-            self.__dict__ = kwargs['userJson']
+            self.__dict__ = kwargs['UserJson']
         except KeyError, e:
             print e                
             self.id = 0
@@ -35,27 +32,39 @@ class user(chat):
             self.last_name = u''
             self.username = u''
 
-class message(object):
+class GroupChat(Chat):
+    
+    def __init__(self, **kwargs):
+        Chat.__init__(self)
+        try:
+            self.__dict__ = kwargs['GroupJson']
+        except KeyError, e:
+            print e                
+            self.id = 0
+            self.title = u''
+
+class Message(object):
     
     def __init__(self, **kwargs):
         
         try:
-            update = kwargs['update'] 
+            update = kwargs['Update'] 
             self.__dict__ = update['message']            
-            self.userFrom = user(userJson = self.__dict__['from'])
-            if not 'title' in self.chat:
-                self.chat = user(userJson = self.chat)
-            else:
-                #self.chat = groupChat(self.chat)
-                print 'It is a group'
+            self.userFrom = User(UserJson = self.__dict__['from'])
+            if 'first_name' in self.chat:
+                self.chat = User(UserJson = self.chat)
+            elif 'title' in self.chat:
+                self.chat = GroupChat(GroupJson = self.chat)
+            else: 
+                self.chat = Chat()
         except KeyError, e:
             print e
             self.date = 0
             self.text = u''
-            self.userFrom = user()
-            self.chatTo = chat()
+            self.userFrom = User()
+            self.chatTo = Chat()
             self.message_id = u''
-            self.chat = chat()
+            self.chat = Chat()
             
 class bot(object):
     
