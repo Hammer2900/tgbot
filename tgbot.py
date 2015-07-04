@@ -7,9 +7,6 @@ Created on Fri Jul  3 21:25:39 2015
 
 import requests
 
-getMe = u'getMe'
-getUpdates = u'getUpdates'
-
 class Chat(object):
     
     def json(self):
@@ -46,10 +43,12 @@ class GroupChat(Chat):
 class Message(object):
     
     def __init__(self, **kwargs):
-        
         try:
-            update = kwargs['Update'] 
-            self.__dict__ = update['message']            
+            if 'Update' in kwargs:            
+                update = kwargs['Update'] 
+                self.__dict__ = update.message            
+            elif 'result' in kwargs:
+                self.__dict__ = kwargs['result'].json()['result']
             self.userFrom = User(UserJson = self.__dict__['from'])
             if 'first_name' in self.chat:
                 self.chat = User(UserJson = self.chat)
@@ -60,33 +59,51 @@ class Message(object):
         except KeyError, e:
             print e
             self.date = 0
-            self.text = u''
             self.userFrom = User()
-            self.chatTo = Chat()
-            self.message_id = u''
+            self.message_id = 0
             self.chat = Chat()
+            #Optionals:
+            self.text = u''
+            #Extras:
+            self.chatTo = Chat()
+            
+class Update(object):
+    
+    def __init__(self, **kwargs):
+        try:
+            self.__dict__ = kwargs['UpdateJson']
+        except KeyError, e:
+            print e
             
 class bot(object):
     
     def sendMessage(self, chat_id, text): 
         print chat_id
-        return requests.get(self.url + u'sendMessage?chat_id=' + unicode(chat_id) + u'&text=' + text)
+        message = requests.get(self.url + u'sendMessage?chat_id=' + unicode(chat_id) + u'&text=' + text)
+        return Message(result = message)
     
-    def getUpdate(self):
+    def getMe(self):
+        return requests.get(self.url + u'getMe')        
     
+    def getUpdates(self):
         try:        
-            self.lastUpdates = requests.get(self.url + getUpdates + u'?offset=' + unicode(self.lastUpdateID + 1))
+            self.lastUpdates = requests.get(self.url + u'getUpdates?offset=' + unicode(self.lastUpdateID + 1))
             self.lastUpdateID = self.lastUpdates.json()['result'][-1]['update_id']
             self.updatesBuff = self.updatesBuff + self.lastUpdates.json()['result']        
+            return self.lastUpdates
         except KeyError, e:
             print str(e)
         except IndexError, e:
             print str(e)
+            return None
         
+    def getUpdate(self):
+        self.getUpdates()
         try: 
             nextUpdate = self.updatesBuff[0]         
             self.updatesBuff = self.updatesBuff[1:]
-            return nextUpdate
+            update = Update(UpdateJson=nextUpdate)
+            return update
         except IndexError, e:
             print str(e)
             return None
@@ -96,11 +113,10 @@ class bot(object):
         keyFile = open(path_to_key, 'r')
         self.botKey = keyFile.readline().split('\n')[0]
         self.url = u'https://api.telegram.org/bot' + unicode(self.botKey) + u'/'
-        self.getMe = requests.get(self.url + getMe)
         
         # TODO evaluate response to getMe. 
         
-        self.lastUpdates = requests.get(self.url+getUpdates)
+        self.lastUpdates = requests.get(self.url+u'getUpdates')
         
         try:        
             self.lastUpdateID = self.lastUpdates.json()['result'][-1]['update_id']
