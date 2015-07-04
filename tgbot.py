@@ -77,11 +77,15 @@ class Update(object):
             
 class bot(object):
     
-    def sendMessage(self, chat_id, text): 
-        print chat_id
-        message = requests.get(self.url + u'sendMessage?chat_id=' + unicode(chat_id) + u'&text=' + text)
-        return Message(result = message)
-    
+    def sendMessage(self, **kwargs): 
+        
+        try: 
+            message = requests.get(self.url + u'sendMessage?chat_id=' + unicode(kwargs['chat_id']) + u'&text=' + kwargs['text'])
+            return Message(result = message)
+        except KeyError, e:
+            print str(e)            
+            return None
+        
     def getMe(self):
         return requests.get(self.url + u'getMe')        
     
@@ -113,21 +117,8 @@ class bot(object):
         keyFile = open(path_to_key, 'r')
         self.botKey = keyFile.readline().split('\n')[0]
         self.url = u'https://api.telegram.org/bot' + unicode(self.botKey) + u'/'
+        self.updatesBuff = []
+        self.lastUpdateID = 0
+        self.lastUpdates = self.getUpdates()
         
-        # TODO evaluate response to getMe. 
-        
-        self.lastUpdates = requests.get(self.url+u'getUpdates')
-        
-        try:        
-            self.lastUpdateID = self.lastUpdates.json()['result'][-1]['update_id']
-            self.updatesBuff = self.lastUpdates.json()['result']  
-        except KeyError, e:
-            print 'A KeyError ocurred'
-            print str(e)
-        except IndexError, e:
-            self.lastUpdateID = 0
-            self.updatesBuff = []
-            print e
-            return None
-
         keyFile.close()
