@@ -7,14 +7,14 @@ Created on Sat Jul  4 01:22:20 2015
 
 import tgbot
 
-echobot = tgbot.bot('ismansiete.txt')
+echoBot = tgbot.bot('ismansiete.txt')
 
 while True: 
-    update = echobot.getUpdate()    
-    if update:
-        message = tgbot.message(update)
+    updateBot = echoBot.getUpdate()    
+    if updateBot:
+        message = tgbot.message(update=updateBot)
         userFrom = message.userFrom
-        echobot.sendMessage(userFrom.id, message.text)       
+        echoBot.sendMessage(userFrom.id, message.text)       
         
 
     
