@@ -7,6 +7,7 @@ Created on Fri Jul  3 21:25:39 2015
 
 import requests
 
+
 class Chat(object):
     
     def json(self):
@@ -15,15 +16,13 @@ class Chat(object):
     def __init__(self):
         self.id = 0
         
-        
 class User(Chat):
 
     def __init__(self, **kwargs):
         Chat.__init__(self)
         try:
             self.__dict__ = kwargs['UserJson']
-        except KeyError, e:
-            print e                
+        except KeyError:
             self.id = 0
             self.first_name = u''
             self.last_name = u''
@@ -35,12 +34,23 @@ class GroupChat(Chat):
         Chat.__init__(self)
         try:
             self.__dict__ = kwargs['GroupJson']
-        except KeyError, e:
-            print e                
+        except KeyError:
             self.id = 0
             self.title = u''
 
 class Message(object):
+    
+    def json(self):
+        jsonDict = self.__dict__
+        for attribute, value in jsonDict.iteritems(): 
+            try: 
+                jsonDict[attribute] = value.json()
+            except TypeError:
+                pass
+            except AttributeError:
+                pass
+        return jsonDict     
+    
     
     def __init__(self, **kwargs):
         try:
@@ -56,8 +66,7 @@ class Message(object):
                 self.chat = GroupChat(GroupJson = self.chat)
             else: 
                 self.chat = Chat()
-        except KeyError, e:
-            print e
+        except KeyError:
             self.date = 0
             self.userFrom = User()
             self.message_id = 0
@@ -72,8 +81,8 @@ class Update(object):
     def __init__(self, **kwargs):
         try:
             self.__dict__ = kwargs['UpdateJson']
-        except KeyError, e:
-            print e
+        except KeyError:
+            pass
             
 class bot(object):
     
@@ -82,8 +91,7 @@ class bot(object):
         try: 
             message = requests.get(self.url + u'sendMessage?chat_id=' + unicode(kwargs['chat_id']) + u'&text=' + kwargs['text'])
             return Message(result = message)
-        except KeyError, e:
-            print str(e)            
+        except KeyError:
             return None
         
     def getMe(self):
@@ -97,8 +105,7 @@ class bot(object):
             return self.lastUpdates
         except KeyError, e:
             print str(e)
-        except IndexError, e:
-            print str(e)
+        except IndexError:
             return None
         
     def getUpdate(self):
@@ -108,8 +115,7 @@ class bot(object):
             self.updatesBuff = self.updatesBuff[1:]
             update = Update(UpdateJson=nextUpdate)
             return update
-        except IndexError, e:
-            print str(e)
+        except IndexError:
             return None
 
     def __init__(self, path_to_key):
