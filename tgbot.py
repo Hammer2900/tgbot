@@ -7,6 +7,17 @@ Created on Fri Jul  3 21:25:39 2015
 
 import requests
 
+#PhotoSize
+#Audio
+#Sticker
+#Video
+#Location
+#InputFile
+#UserProfilePhotos
+#ReplyKeyboardMarkup
+#ReplyKeyboardHide
+#ForceReply
+
 
 class Chat(object):
     
@@ -28,6 +39,15 @@ class User(Chat):
             self.last_name = u''
             self.username = u''
 
+class Conctact(User):
+    
+    def __init__(self, **kwargs):
+        User.__init__(self)
+        try:
+            self.__dict__ = kwargs['ContactJson']
+        except KeyError:
+            pass
+        
 class GroupChat(Chat):
     
     def __init__(self, **kwargs):
@@ -37,6 +57,14 @@ class GroupChat(Chat):
         except KeyError:
             self.id = 0
             self.title = u''
+            
+class Document(object):
+    
+    def __init__(self, **kwargs):
+        try:
+            self.__dict__ = kwargs['DocumentJson']
+        except KeyError:
+            pass
 
 class Message(object):
     
@@ -85,17 +113,39 @@ class Update(object):
             pass
             
 class bot(object):
+
+    def getMe(self):
+        return requests.get(self.url + u'getMe')      
+    
     
     def sendMessage(self, **kwargs): 
-        
         try: 
-            message = requests.get(self.url + u'sendMessage?chat_id=' + unicode(kwargs['chat_id']) + u'&text=' + kwargs['text'])
+            message = requests.get(self.url + u'sendMessage?' +
+                                    u'chat_id=' + unicode(kwargs['chat_id']) + 
+                                    u'&text=' + kwargs['text'])
+            return Message(result = message)
+        except KeyError:
+            return None
+
+    def forwardMessage(self, **kwargs):
+        try: 
+            message = requests.get(self.url + u'forwardMessage?' +
+                                    u'chat_id=' + unicode(kwargs['chat_id']) + 
+                                    u'&from_chat_id=' + unicode(kwargs['from_chat_id']) +
+                                    u'&message_id=' + unicode(kwargs['message_id']))
             return Message(result = message)
         except KeyError:
             return None
         
-    def getMe(self):
-        return requests.get(self.url + u'getMe')        
+    
+#    sendPhoto
+#    sendAudio
+#    sendDocument
+#    sendSticker
+#    sendVideo
+#    sendLocation
+#    sendChatAction
+#    getUserProfilePhotos
     
     def getUpdates(self):
         try:        
