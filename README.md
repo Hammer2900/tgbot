@@ -1,5 +1,7 @@
 # tgbot
-Library for quick Telegram Bot with Python. 
+Library for quick Telegram Bot with Python. Project moved to [telegram-bot-api](https://github.com/isman7/telegram-bot-api), forked from [Eiyeron](https://github.com/Eiyeron).
+
+
 
 ## Example of use
 
