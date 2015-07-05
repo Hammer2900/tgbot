@@ -14,7 +14,7 @@ while True:
     if updateBot:
         message = tgbot.Message(Update=updateBot)
         userFrom = message.userFrom
-        echoBot.sendMessage(chat_id=userFrom.id, text=message.text)       
+        echoBot.sendMessage(userFrom.id, message.text)       
         
 
     

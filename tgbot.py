@@ -7,6 +7,7 @@ Created on Fri Jul  3 21:25:39 2015
 
 import requests
 
+
 #PhotoSize
 #Audio
 #Sticker
@@ -111,21 +112,70 @@ class Update(object):
             self.__dict__ = kwargs['UpdateJson']
         except KeyError:
             pass
+
+class ReplyKeyBoard(object):
+    
+    def json(self):
+        return self.__dict__  
+        
+    def __init__(self, **kwargs):
+        if 'selective' in kwargs:
+            self.selective = kwargs['selective']
+        else:
+            self.selective = False
+
+class ReplyKeyboardMarkup(ReplyKeyBoard):
+    
+    def __init__(self, keyboard, **kwargs):
+        ReplyKeyBoard.__init__(self, **kwargs)        
+        self.keyboard = keyboard
+        if 'resize_keyboard' in kwargs:
+            self.resize_keyboard = kwargs['resize_keyboard']
+        else:
+            self.resize_keyboard = False
+        if 'one_time_keyboard' in kwargs:
+            self.one_time_keyboard = kwargs['one_time_keyboard']
+        else:
+            self.one_time_keyboard = False
+        
+class ReplyKeyboardHide(ReplyKeyBoard):
+    
+    def __init__(self, **kwargs):
+        ReplyKeyBoard.__init__(self, **kwargs)       
+        self.hide_keyboard = True
+        
+class ForceReply(ReplyKeyBoard):
+    
+    def __init__(self, **kwargs):
+        ReplyKeyBoard.__init__(self, **kwargs)        
+        self.force_reply = True
+        
+
+
+######################################################
+
             
 class bot(object):
 
     def getMe(self):
         return requests.get(self.url + u'getMe')      
     
-    
-    def sendMessage(self, **kwargs): 
-        try: 
-            message = requests.get(self.url + u'sendMessage?' +
-                                    u'chat_id=' + unicode(kwargs['chat_id']) + 
-                                    u'&text=' + kwargs['text'])
-            return Message(result = message)
-        except KeyError:
-            return None
+    def sendMessage(self, chat_id, text, **kwargs): 
+        parameters = {}
+        parameters['chat_id'] = chat_id
+        parameters['text'] = text
+        
+        if 'disable_web_page_preview' in kwargs:
+            parameters['disable_web_page_preview'] = kwargs['disable_web_page_preview']
+        if 'reply_to_message_id' in kwargs:
+            parameters['reply_to_message_id'] = kwargs['reply_to_message_id']
+        if 'reply_markup' in kwargs:
+            parameters['reply_markup'] = kwargs['reply_markup']
+        
+        message = requests.get(self.url + u'sendMessage', params = parameters)
+        return Message(result = message)    
+            
+            
 
     def forwardMessage(self, **kwargs):
         try: 
